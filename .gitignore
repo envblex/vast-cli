@@ -1,0 +1,17 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Go artifacts
+/vast
+/vastai
+bin/
+*.exe
+*.test
+*.out
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
