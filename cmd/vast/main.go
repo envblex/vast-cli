@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -281,6 +282,51 @@ func main() {
 			}
 			return
 
+		case "api-keys":
+			keys, err := api.ShowAPIKeys(ctx, c)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(keys)
+			return
+
+		case "audit-logs":
+			logs, err := api.ShowAuditLogs(ctx, c)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(logs)
+			return
+
+		case "connections":
+			conns, err := api.ShowConnections(ctx, c)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(conns)
+			return
+
+		case "ipaddrs":
+			ips, err := api.ShowIPAddrs(ctx, c)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(ips)
+			return
+
+		case "invoices-v1":
+			invs, err := api.ShowInvoicesV1(ctx, c, url.Values{})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(invs)
+			return
+
 		case "volumes":
 			vols, err := api.ShowVolumes(ctx, c)
 			if err != nil {
@@ -343,6 +389,16 @@ func main() {
 			display.PrintJSON(tmpl)
 			return
 
+		case "benchmarks":
+			queryStr := strings.Join(rest, " ")
+			bms, err := api.SearchBenchmarks(ctx, c, queryStr)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(bms)
+			return
+
 		case "volumes":
 			queryStr := strings.Join(rest, " ")
 			vols, err := api.SearchVolumes(ctx, c, queryStr)
@@ -355,9 +411,24 @@ func main() {
 		}
 	}
 
-	// 4. create instance / create ssh-key / create env-var
+	// 4. create instance / create ssh-key / create env-var / create api-key
 	if cmd == "create" {
 		switch subCmd {
+		case "api-key":
+			name, remaining := getFlagValue(rest, "--name")
+			if name == "" && len(remaining) > 0 {
+				name = remaining[0]
+			}
+			if name == "" {
+				name = "default"
+			}
+			res, err := api.CreateAPIKey(ctx, c, name, nil)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(res)
+			return
 		case "instance":
 			if len(rest) == 0 {
 				fmt.Fprintln(os.Stderr, "error: offer ID required: vastai create instance <OFFER_ID> [flags]")
@@ -687,6 +758,20 @@ func main() {
 			display.PrintJSON(res)
 			return
 
+		case "api-key":
+			if len(rest) == 0 {
+				fmt.Fprintln(os.Stderr, "error: api-key ID required: vastai delete api-key <ID>")
+				os.Exit(1)
+			}
+			id, _ := strconv.ParseInt(rest[0], 10, 64)
+			res, err := api.DeleteAPIKey(ctx, c, id)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+			display.PrintJSON(res)
+			return
+
 		case "env-var":
 			if len(rest) == 0 {
 				fmt.Fprintln(os.Stderr, "error: env-var name required: vastai delete env-var <KEY>")
@@ -700,6 +785,48 @@ func main() {
 			display.PrintJSON(res)
 			return
 		}
+	}
+
+	// 13. attach / detach ssh
+	if cmd == "attach" && subCmd == "ssh" {
+		if len(rest) < 2 {
+			fmt.Fprintln(os.Stderr, "error: instance ID and ssh key required: vastai attach ssh <ID> <KEY>")
+			os.Exit(1)
+		}
+		id, _ := strconv.ParseInt(rest[0], 10, 64)
+		res, err := api.AttachSSH(ctx, c, id, rest[1])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		display.PrintJSON(res)
+		return
+	}
+
+	if cmd == "detach" && subCmd == "ssh" {
+		if len(rest) < 2 {
+			fmt.Fprintln(os.Stderr, "error: instance ID and ssh key ID required: vastai detach ssh <ID> <KEY_ID>")
+			os.Exit(1)
+		}
+		id, _ := strconv.ParseInt(rest[0], 10, 64)
+		res, err := api.DetachSSH(ctx, c, id, rest[1])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		display.PrintJSON(res)
+		return
+	}
+
+	// 14. reset api-key
+	if cmd == "reset" && subCmd == "api-key" {
+		res, err := api.ResetAPIKey(ctx, c)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		display.PrintJSON(res)
+		return
 	}
 
 	fmt.Fprintf(os.Stderr, "unknown command: %s %s\nRun 'vastai --help' for usage.\n", cmd, subCmd)
