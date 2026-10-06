@@ -10,6 +10,7 @@ import (
 const (
 	DefaultServerURL = "https://console.vast.ai"
 	Version          = "1.8.3-go"
+	OfficialVersion  = "1.8.3"
 )
 
 // GetConfigDir returns ~/.config/vastai or $XDG_CONFIG_HOME/vastai

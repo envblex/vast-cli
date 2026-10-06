@@ -27,7 +27,8 @@ type GlobalFlags struct {
 }
 
 func printHelp() {
-	helpText := `usage: vastai [global options] command [subcommand] [args...] [flags...]
+	helpText := fmt.Sprintf(`vastai-go %s (compatible with official vastai v%s)
+usage: vastai [global options] command [subcommand] [args...] [flags...]
 
 Global options:
   --api-key KEY    API Key (defaults to ~/.config/vastai/vast_api_key or VAST_API_KEY)
@@ -44,6 +45,7 @@ Commands:
     search offers [query]        Search GPU offers (flags: --type, -o/--order, --limit, --storage, -n/--no-default)
     search templates [query]     Search public/private templates
     search volumes [query]       Search volume offers
+    search benchmarks [query]    Search GPU benchmarks
 
   Instances:
     show instances               List all your instances (flags: --status, --gpu-name, --label)
@@ -60,6 +62,8 @@ Commands:
   SSH & Connectivity:
     ssh-url <id>                 Get ssh:// connection URL
     scp-url <id>                 Get scp:// URL
+    attach ssh <id> <key>        Attach SSH public key to instance
+    detach ssh <id> <key_id>     Detach SSH key from instance
     show ssh-keys                List registered SSH keys
     create ssh-key [key/file]    Add SSH key (path to .pub or key string)
     delete ssh-key <id>          Remove SSH key
@@ -70,12 +74,20 @@ Commands:
 
   Account & Secrets:
     set api-key <key>            Save API key to ~/.config/vastai/vast_api_key
+    reset api-key                Reset master API key
+    show api-keys                List API keys
+    create api-key --name <name> Create restricted API key
+    delete api-key <id>          Delete API key
     show user                    Show account profile and credit balance
+    show audit-logs              Account action history
+    show connections             Cloud storage connections
+    show ipaddrs                 IP address history
+    show invoices-v1             Invoices and charges history
     show env-vars                List environment variables
     create env-var <key> <val>   Set an environment variable
     delete env-var <key>         Delete an environment variable
     show volumes                 List your volumes
-`
+`, config.Version, config.OfficialVersion)
 	fmt.Print(helpText)
 }
 
@@ -162,7 +174,7 @@ func main() {
 	g, cmdArgs := parseGlobalAndCommandArgs(rawArgs)
 
 	if g.Version {
-		fmt.Println(config.Version)
+		fmt.Printf("vastai-go %s (compatible with official vastai v%s)\n", config.Version, config.OfficialVersion)
 		return
 	}
 

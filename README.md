@@ -1,10 +1,12 @@
 # vast-cli (Go Implementation)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/envblex/vast-cli)](https://goreportcard.com/report/github.com/envblex/vast-cli)
+[![Official CLI Version](https://img.shields.io/badge/official%20vastai-v1.8.3%20compatible-green.svg)](https://pypi.org/project/vastai/1.8.3/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Vast.ai の公式 Python CLI (`vastai`) を解析し、Go 言語で依存ゼロ・超高速・省メモリな単一バイナリとして完全再実装した軽量 CLI ツールです。
+Vast.ai の公式 Python CLI (`vastai` **v1.8.3** 準拠) を解析し、Go 言語で依存ゼロ・超高速・省メモリな単一バイナリとして完全再実装した軽量 CLI ツールです。
 
+> **対応バージョン**: 公式 Python CLI **`vastai 1.8.3`**（2026年最新）の API 仕様およびクエリ仕様に完全対応しています。  
 > **初めて Vast.ai を利用される方へ**:  
 > アカウント開設からクレジットのチャージ、GPU の検索、インスタンスの起動、SSH ログイン、そして最も重要な**課金の止め方**までをゼロから解説した [初心者向けスタートガイド (docs/getting-started.md)](docs/getting-started.md) を用意しています。
 
