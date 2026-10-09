@@ -7,6 +7,9 @@ ENV/
 /vast
 /vastai
 bin/
+dist/
+release-assets/
+all-assets/
 *.exe
 *.test
 *.out
